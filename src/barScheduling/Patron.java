@@ -60,7 +60,7 @@ public class Patron extends Thread {
 	        	//drinksOrder[i]=new DrinkOrder(this.ID,i); //fixed drink order (=CPU burst), useful for testing
 				System.out.println("Order placed by " + drinksOrder[i].toString()); //output in standard format  - do not change this
 				theBarman.placeDrinkOrder(drinksOrder[i]);
-				timeData.startTime = System.nanoTime();
+				if (i == 0) timeData.startTime = System.nanoTime();
 				drinksOrder[i].waitForOrder();
 				if (i == 0) timeData.firstResponseTime = System.nanoTime();
 				System.out.println("Drinking patron " + drinksOrder[i].toString());
@@ -68,6 +68,7 @@ public class Patron extends Thread {
 			}
 
 			timeData.finishTime = System.nanoTime();
+			timeData.writeOut(String.format("./data/Patron%d.csv", this.ID));
 			System.out.println("Patron "+ this.ID + " completed ");
 			
 		} catch (InterruptedException e1) {  //do nothing

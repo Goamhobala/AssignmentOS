@@ -48,17 +48,26 @@ public class Barman extends Thread {
 			DrinkOrder currentOrder;
 			// arrival time
 			startSignal.countDown(); //barman ready
-			timeData.arrivalTime = System.nanoTime();
+			;
 
 			// start time
 			startSignal.await();
-			timeData.startTime = System.nanoTime(); //check latch - don't start until told to do so 
-
+			timeData.arrivalTime = System.nanoTime();
+			 //check latch - don't start until told to do so 
+			boolean first = true;
 			if ((schedAlg==0)||(schedAlg==1)) { //FCFS and non-preemptive SJF
 				while(true) {
 					currentOrder=orderQueue.take();
+					// first request
+					if (first) timeData.startTime = System.nanoTime();
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString());
+					
 					sleep(currentOrder.getExecutionTime()); //processing order (="CPU burst")
+					if (first){
+						// first response
+						timeData.firstResponseTime = System.nanoTime();
+						first = false;
+					}
 					System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
 					currentOrder.orderDone();
 					sleep(switchTime);//cost for switching orders
@@ -71,6 +80,7 @@ public class Barman extends Thread {
 
 				while(true) {
 					System.out.println("---Barman waiting for next order ");
+					if (first) timeData.startTime = System.nanoTime();
 					currentOrder=orderQueue.take();
 
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString() );
@@ -91,11 +101,14 @@ public class Barman extends Thread {
 					sleep(switchTime);//switching orders
 				}
 			}
+		
 				
 		} catch (InterruptedException e1) {
 			System.out.println("---Barman is packing up ");
 			System.out.println("---number interrupts="+interrupts);
+			timeData.finishTime = System.nanoTime();
 		}
+		timeData.writeOut("./data/barman.csv");
 	}
 }
 

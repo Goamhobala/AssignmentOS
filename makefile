@@ -31,5 +31,8 @@ $(BIN_DIR)/%.class: $(SRC_DIR)/%.java
 clean:
 	rm -rf bin/*
 
+cleanData:
+	rm -rf data/*
+
 run: all
 	java -classpath bin $(MAIN_CLASS) $(ARGS)
