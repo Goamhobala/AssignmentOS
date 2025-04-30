@@ -2,7 +2,6 @@
 package barScheduling;
 
 
-import java.lang.System;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -17,8 +16,6 @@ public class Patron extends Thread {
 	private int ID; //thread ID 
 	private int numberOfDrinks;
 	private Timing timeData;
-	private System sys;
-
 
 	private DrinkOrder [] drinksOrder;
 	
@@ -60,15 +57,15 @@ public class Patron extends Thread {
 	        	//drinksOrder[i]=new DrinkOrder(this.ID,i); //fixed drink order (=CPU burst), useful for testing
 				System.out.println("Order placed by " + drinksOrder[i].toString()); //output in standard format  - do not change this
 				theBarman.placeDrinkOrder(drinksOrder[i]);
-				if (i == 0) timeData.startTime = System.nanoTime();
+				timeData.waitingStartTimes.add(System.nanoTime());
 				drinksOrder[i].waitForOrder();
-				if (i == 0) timeData.firstResponseTime = System.nanoTime();
+				timeData.waitingEndTimes.add(System.nanoTime());
 				System.out.println("Drinking patron " + drinksOrder[i].toString());
 				sleep(drinksOrder[i].getImbibingTime()); //drinking drink = "IO"
 			}
 
 			timeData.finishTime = System.nanoTime();
-			timeData.writeOut(String.format("./data/Patron%d.csv", this.ID));
+			timeData.writeOut(String.format("./data/patron%d.csv", this.ID));
 			System.out.println("Patron "+ this.ID + " completed ");
 			
 		} catch (InterruptedException e1) {  //do nothing

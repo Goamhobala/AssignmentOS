@@ -51,23 +51,26 @@ public class Barman extends Thread {
 			;
 
 			// start time
+			//check latch - don't start until told to do so 
 			startSignal.await();
 			timeData.arrivalTime = System.nanoTime();
-			 //check latch - don't start until told to do so 
-			boolean first = true;
+
+			// boolean first = true;
+			int processCounter = 0;
 			if ((schedAlg==0)||(schedAlg==1)) { //FCFS and non-preemptive SJF
 				while(true) {
 					currentOrder=orderQueue.take();
-					// first request
-					if (first) timeData.startTime = System.nanoTime();
+					
+					timeData.waitingStartTimes.add(System.nanoTime());
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString());
 					
 					sleep(currentOrder.getExecutionTime()); //processing order (="CPU burst")
-					if (first){
-						// first response
-						timeData.firstResponseTime = System.nanoTime();
-						first = false;
-					}
+					// if (first){
+					// 	// first response
+					// 	timeData.firstResponseTime = System.nanoTime();
+					// 	first = false;
+					// }
+					timeData.waitingEndTimes.add(System.nanoTime());
 					System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
 					currentOrder.orderDone();
 					sleep(switchTime);//cost for switching orders
@@ -80,8 +83,9 @@ public class Barman extends Thread {
 
 				while(true) {
 					System.out.println("---Barman waiting for next order ");
-					if (first) timeData.startTime = System.nanoTime();
+					// if (first) timeData.startTime = System.nanoTime();
 					currentOrder=orderQueue.take();
+					timeData.waitingStartTimes.add(System.nanoTime());
 
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString() );
 					burst=currentOrder.getExecutionTime();
