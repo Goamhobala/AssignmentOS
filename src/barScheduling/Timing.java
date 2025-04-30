@@ -16,19 +16,19 @@ public class Timing {
     // protected long firstResponseTime;
     // Finished task
     protected long finishTime;
-    protected ArrayList<Long> waitingStartTimes;
-    protected ArrayList<Long> waitingEndTimes;
+    protected ArrayList<Long> prepStartTimes;
+    protected ArrayList<Long> prepEndTimes;
 
     public Timing(){
-        this.waitingStartTimes = new ArrayList<Long>();
-        this.waitingEndTimes = new ArrayList<Long>();
+        this.prepStartTimes = new ArrayList<Long>();
+        this.prepEndTimes = new ArrayList<Long>();
     }
 
     public void writeOut(String output){
         try{
         File file = new File(output);
         BufferedWriter fr = new BufferedWriter(new FileWriter(file, true));
-        fr.write(String.format("%d, %d, [%s, %s]\n", arrivalTime, finishTime, waitingStartTimes.toString(), waitingEndTimes.toString()));
+        fr.write(String.format("%d, %d, [%s, %s]\n", arrivalTime, finishTime, prepStartTimes.toString(), prepEndTimes.toString()));
         fr.close();
         }
         catch (IOException e){

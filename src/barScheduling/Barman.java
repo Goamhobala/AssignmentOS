@@ -1,12 +1,14 @@
 //M. M. Kuttel 2025 mkuttel@gmail.com
 package barScheduling;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /*
  Barman Thread class.
  */
@@ -19,13 +21,13 @@ public class Barman extends Thread {
 	int schedAlg =0;
 	int q=10000; //really big if not set, so FCFS
 	private int switchTime;
-	private Timing timeData;
+	private ArrayList<Timing> timeData;
 	
 	
 	Barman(  CountDownLatch startSignal,int sAlg) {
 		//which scheduling algorithm to use
 		this.schedAlg=sAlg;
-		this.timeData = new Timing();
+		this.timeData = new ArrayList<Timing>();
 		if (schedAlg==1) this.orderQueue = new PriorityBlockingQueue<>(5000, Comparator.comparingInt(DrinkOrder::getExecutionTime)); //SJF
 		else this.orderQueue = new LinkedBlockingQueue<>(); //FCFS & RR
 	    this.startSignal=startSignal;
@@ -53,24 +55,32 @@ public class Barman extends Thread {
 			// start time
 			//check latch - don't start until told to do so 
 			startSignal.await();
-			timeData.arrivalTime = System.nanoTime();
+			// timeData.arrivalTime = System.nanoTime();
 
 			// boolean first = true;
 			int processCounter = 0;
+
+			int orderer;
+			// regex for finding the patron id from order.toString
+			Pattern pattern = Pattern.compile("(\\d+)");
+			Matcher matcher;
 			if ((schedAlg==0)||(schedAlg==1)) { //FCFS and non-preemptive SJF
 				while(true) {
 					currentOrder=orderQueue.take();
-					
-					timeData.waitingStartTimes.add(System.nanoTime());
+					// figure out witch patron ordered the drink
+					matcher = pattern.matcher(currentOrder.toString());
+					matcher.find();
+					orderer = Integer.parseInt(matcher.group());
+					System.out.println("Orderer: " + Integer.toString(orderer));
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString());
 					
 					sleep(currentOrder.getExecutionTime()); //processing order (="CPU burst")
+					
 					// if (first){
 					// 	// first response
 					// 	timeData.firstResponseTime = System.nanoTime();
 					// 	first = false;
 					// }
-					timeData.waitingEndTimes.add(System.nanoTime());
 					System.out.println("---Barman has made drink for patron "+ currentOrder.toString());
 					currentOrder.orderDone();
 					sleep(switchTime);//cost for switching orders
@@ -85,7 +95,7 @@ public class Barman extends Thread {
 					System.out.println("---Barman waiting for next order ");
 					// if (first) timeData.startTime = System.nanoTime();
 					currentOrder=orderQueue.take();
-					timeData.waitingStartTimes.add(System.nanoTime());
+					// timeData.waitingStartTimes.add(System.nanoTime());
 
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString() );
 					burst=currentOrder.getExecutionTime();
@@ -110,9 +120,9 @@ public class Barman extends Thread {
 		} catch (InterruptedException e1) {
 			System.out.println("---Barman is packing up ");
 			System.out.println("---number interrupts="+interrupts);
-			timeData.finishTime = System.nanoTime();
+			// timeData.finishTime = System.nanoTime();
 		}
-		timeData.writeOut("./data/barman.csv");
+		// timeData.writeOut("./data/barman.csv");
 	}
 }
 

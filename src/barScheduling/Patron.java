@@ -57,9 +57,9 @@ public class Patron extends Thread {
 	        	//drinksOrder[i]=new DrinkOrder(this.ID,i); //fixed drink order (=CPU burst), useful for testing
 				System.out.println("Order placed by " + drinksOrder[i].toString()); //output in standard format  - do not change this
 				theBarman.placeDrinkOrder(drinksOrder[i]);
-				timeData.waitingStartTimes.add(System.nanoTime());
+				timeData.prepStartTimes.add(System.nanoTime());
 				drinksOrder[i].waitForOrder();
-				timeData.waitingEndTimes.add(System.nanoTime());
+				timeData.prepEndTimes.add(System.nanoTime());
 				System.out.println("Drinking patron " + drinksOrder[i].toString());
 				sleep(drinksOrder[i].getImbibingTime()); //drinking drink = "IO"
 			}
