@@ -24,7 +24,8 @@ public class Patron extends Thread {
 		this.startSignal=startSignal;
 		this.theBarman=aBarman;
 		this.numberOfDrinks=5; // number of drinks is fixed
-		this.timeData = new Timing();
+		this.timeData = new Timing(ID);
+		this.theBarman.registerPatronTiming(this.timeData);
 		drinksOrder=new DrinkOrder[numberOfDrinks];
 		if (seed>0) random = new Random(seed);// for consistent Patron behaviour
 		else random = new Random();
@@ -40,13 +41,12 @@ public class Patron extends Thread {
 			// arrival time
 
 			startSignal.countDown(); //this patron is ready
-			timeData.arrivalTime = System.nanoTime();
 			startSignal.await(); //wait till everyone is ready
 			
 			int arrivalTime = ID*50; //fixed arrival for testing
 	        sleep(arrivalTime);// Patrons arrive at staggered  times depending on ID 
 			// start time
-			timeData.arrivalTime = System.nanoTime();
+			
 			
 			System.out.println("+new thirsty Patron "+ this.ID +" arrived"); //Patron has actually arrived
 			//End do not change
@@ -57,9 +57,12 @@ public class Patron extends Thread {
 	        	//drinksOrder[i]=new DrinkOrder(this.ID,i); //fixed drink order (=CPU burst), useful for testing
 				System.out.println("Order placed by " + drinksOrder[i].toString()); //output in standard format  - do not change this
 				theBarman.placeDrinkOrder(drinksOrder[i]);
-				timeData.prepStartTimes.add(System.nanoTime());
+				if (i==0)timeData.startTime = System.nanoTime();
+				timeData.lastRecordedTime = System.nanoTime();
+				// timeData.prepStartTimes.add(System.nanoTime());
 				drinksOrder[i].waitForOrder();
-				timeData.prepEndTimes.add(System.nanoTime());
+
+				timeData.firstResponseTime = System.nanoTime() - timeData.startTime;
 				System.out.println("Drinking patron " + drinksOrder[i].toString());
 				sleep(drinksOrder[i].getImbibingTime()); //drinking drink = "IO"
 			}

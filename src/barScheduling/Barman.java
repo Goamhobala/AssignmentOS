@@ -67,10 +67,14 @@ public class Barman extends Thread {
 			if ((schedAlg==0)||(schedAlg==1)) { //FCFS and non-preemptive SJF
 				while(true) {
 					currentOrder=orderQueue.take();
+					long currentTime = System.nanoTime();
 					// figure out witch patron ordered the drink
 					matcher = pattern.matcher(currentOrder.toString());
 					matcher.find();
 					orderer = Integer.parseInt(matcher.group());
+					Timing currentPatronData = timeData.get(orderer);
+					currentPatronData.waitingTime += (currentTime - currentPatronData.lastRecordedTime);
+					currentPatronData.lastRecordedTime = currentTime;
 					System.out.println("Orderer: " + Integer.toString(orderer));
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString());
 					
@@ -94,7 +98,17 @@ public class Barman extends Thread {
 				while(true) {
 					System.out.println("---Barman waiting for next order ");
 					// if (first) timeData.startTime = System.nanoTime();
+
 					currentOrder=orderQueue.take();
+					long currentTime = System.nanoTime();
+					matcher = pattern.matcher(currentOrder.toString());
+					matcher.find();
+					orderer = Integer.parseInt(matcher.group());
+					Timing currentPatronData = this.timeData.get(orderer);
+					System.out.println("Timing: " + currentTime + " " + currentPatronData.lastRecordedTime);
+					currentPatronData.waitingTime += (currentTime - currentPatronData.lastRecordedTime);
+					currentPatronData.lastRecordedTime= currentTime;
+					
 					// timeData.waitingStartTimes.add(System.nanoTime());
 
 					System.out.println("---Barman preparing drink for patron "+ currentOrder.toString() );
@@ -124,6 +138,13 @@ public class Barman extends Thread {
 		}
 		// timeData.writeOut("./data/barman.csv");
 	}
+	public void registerPatronTiming(Timing t){
+		/*
+		 * To add the Timing object of the patron to TimeData list
+		 */
+		timeData.add(t);
+	}
+
 }
 
 
